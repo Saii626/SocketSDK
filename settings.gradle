@@ -1,0 +1,10 @@
+include ':ConfigurationManagement', ':PojoCollections', ':GsonManagement', ':CommonLogic', ':DIManagement', ':LogManagement'
+
+project(':ConfigurationManagement').projectDir = file('../ConfigurationManagement')
+project(':PojoCollections').projectDir = file('../PojoCollections')
+project(':GsonManagement').projectDir = file('../GsonManagement')
+project(':DIManagement').projectDir = file('../DIManagement')
+project(':CommonLogic').projectDir = file('../CommonLogic')
+project(':LogManagement').projectDir = file('../LogManagement')
+
+rootProject.name = 'SocketSDK'
