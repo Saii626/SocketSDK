@@ -26,10 +26,10 @@ dependencies {
     implementation project(':GsonManagement')
     implementation project(':CommonLogic')
     implementation project(':LogManagement')
+    implementation project(':DIManagement')
 
 
     implementation group: 'com.google.guava', name: 'guava', version: '28.0-jre'
     
-    testImplementation project(':DIManagement')
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 }

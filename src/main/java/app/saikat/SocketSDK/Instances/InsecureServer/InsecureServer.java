@@ -1,4 +1,4 @@
-package app.saikat.SocketSDK.Instances;
+package app.saikat.SocketSDK.Instances.InsecureServer;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -10,7 +10,7 @@ import app.saikat.SocketSDK.IO.MessageQueue;
 
 public class InsecureServer extends Server {
 
-    public InsecureServer(String name, int port, Gson gson, MessageQueue inputQueue) {
+    InsecureServer(String name, int port, Gson gson, MessageQueue inputQueue) {
         super(name, port, gson, inputQueue);
 	}
 

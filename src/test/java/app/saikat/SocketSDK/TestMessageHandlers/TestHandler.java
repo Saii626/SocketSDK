@@ -5,22 +5,28 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
 
 import com.google.gson.Gson;
 
+import app.saikat.DIManagement.DIManager;
+import app.saikat.DIManagement.Provides;
 import app.saikat.PojoCollections.SocketMessages.InfoMessage;
 import app.saikat.SocketSDK.CommonFiles.MessageHeader;
 import app.saikat.SocketSDK.GenricServerClient.interfaces.Sender;
+import app.saikat.SocketSDK.IO.Providers.MethodHandlers;
 
 public class TestHandler {
 
     private Gson gson;
     private File file;
     private BufferedOutputStream out;
-    private byte[] msgTerminator = "\n-------------------------------------------------------------------------------------------------\n".getBytes();
+    private byte[] msgTerminator = "\n-------------------------------------------------------------------------------------------------\n"
+            .getBytes();
 
     @Inject
     public TestHandler(Gson gson) throws FileNotFoundException {
@@ -29,6 +35,12 @@ public class TestHandler {
         this.file = new File("testFile.txt");
         FileOutputStream fout = new FileOutputStream(this.file);
         out = new BufferedOutputStream(fout);
+    }
+
+    @Provides
+    @MethodHandlers
+    public List<Method> getMethodHandlers() {
+        return DIManager.getAnnotatedMethods(MessageHandlerAnnot.class);        
     }
 
     @MessageHandlerAnnot

@@ -1,4 +1,4 @@
-package app.saikat.SocketSDK.Instances;
+package app.saikat.SocketSDK.Instances.SSLServer;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -12,7 +12,7 @@ import app.saikat.SocketSDK.IO.MessageQueue;
 
 public class SSLServer extends Server {
 
-    public SSLServer(String name, int port, Gson gson, MessageQueue inputQueue) {
+    SSLServer(String name, int port, Gson gson, MessageQueue inputQueue) {
         super(name, port, gson, inputQueue);
 	}
 

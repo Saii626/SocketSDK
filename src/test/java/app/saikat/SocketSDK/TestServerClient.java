@@ -28,8 +28,10 @@ import app.saikat.LogManagement.LoggerFactory;
 import app.saikat.SocketSDK.Exceptions.WrongHandlerMethodException;
 import app.saikat.SocketSDK.IO.MessageHandlers;
 import app.saikat.SocketSDK.IO.MessageQueue;
-import app.saikat.SocketSDK.Instances.InsecureClient;
-import app.saikat.SocketSDK.Instances.InsecureServer;
+import app.saikat.SocketSDK.Instances.InsecureClient.InsecureClient;
+import app.saikat.SocketSDK.Instances.InsecureClient.InsecureClientFactory;
+import app.saikat.SocketSDK.Instances.InsecureServer.InsecureServer;
+import app.saikat.SocketSDK.Instances.InsecureServer.InsecureServerFactory;
 import app.saikat.SocketSDK.TestMessageHandlers.MessageHandlerAnnot;
 import app.saikat.SocketSDK.TestMessageHandlers.TestHandler;
 import app.saikat.SocketSDK.TestMessageHandlers.TestMessage1;
@@ -49,39 +51,39 @@ public class TestServerClient {
                         .autoInvoke(false)
                         .checkDependency(false)
                         .build())
-                .addPackagesToScan("app.saikat.ConfigurationManagement", "app.saikat.PojoCollections",
-                        "app.saikat.GsonManagement", "app.saikat.CommonLogic", "app.saikat.DIManagement",
-                        "app.saikat.LogManagement", "app.saikat.SocketSDK.TestMessageHandlers")
+                .addPackagesToScan("app.saikat")
                 .build();
         DIManager.initialize(config);
 
-        MessageHandlers handlers = new MessageHandlers();
-        List<Method> handlerMethods = DIManager.getAnnotatedMethods(MessageHandlerAnnot.class);
+        // MessageHandlers handlers = new MessageHandlers();
+        // List<Method> handlerMethods = DIManager.getAnnotatedMethods(MessageHandlerAnnot.class);
 
-        handlerMethods.forEach(m -> {
-            Class<?> parentCls = m.getDeclaringClass();
-            Class<? extends Annotation> parentClsAnnotation = DIManager.getQualifierAnnotation(parentCls);
+        // handlerMethods.forEach(m -> {
+        //     Class<?> parentCls = m.getDeclaringClass();
+        //     Class<? extends Annotation> parentClsAnnotation = DIManager.getQualifierAnnotation(parentCls);
 
-            try {
-                Object obj = DIManager.get(parentCls, parentClsAnnotation);
-                assertTrue("Got valid object", obj != null);
+        //     try {
+        //         Object obj = DIManager.get(parentCls, parentClsAnnotation);
+        //         assertTrue("Got valid object", obj != null);
 
-                handlers.addHandler(m, obj);
-            } catch (ClassNotUnderDIException | WrongHandlerMethodException e) {
-                logger.error(e);
-                assertTrue("Error", false);
-            }
-        });
+        //         handlers.addHandler(m, obj);
+        //     } catch (ClassNotUnderDIException | WrongHandlerMethodException e) {
+        //         logger.error(e);
+        //         assertTrue("Error", false);
+        //     }
+        // });
 
-        ThreadPoolManager threadPoolManager = DIManager.get(ThreadPoolManager.class);
-        MessageQueue messageQueue = new MessageQueue(handlers, threadPoolManager);
-        Gson gson = DIManager.get(Gson.class);
+        // ThreadPoolManager threadPoolManager = DIManager.get(ThreadPoolManager.class);
+        // MessageQueue messageQueue = new MessageQueue(handlers, threadPoolManager);
+        // Gson gson = DIManager.get(Gson.class);
 
-        ConfigurationManager configurationManager = DIManager.get(ConfigurationManager.class);
-        configurationManager.syncConfigurations();
+        // ConfigurationManager configurationManager = DIManager.get(ConfigurationManager.class);
+        // configurationManager.syncConfigurations();
 
-        InsecureServer server = new InsecureServer("TestServer", 5000, gson, messageQueue);
-        InsecureClient client = new InsecureClient("TestClient", null, 5000, messageQueue, gson);
+        InsecureServerFactory serverFactory = DIManager.get(InsecureServerFactory.class);
+        InsecureClientFactory clientFactory = DIManager.get(InsecureClientFactory.class);
+        InsecureServer server = serverFactory.getServer("TestServer", 5000);
+        InsecureClient client = clientFactory.getClient("TestClient", null, 5000);
 
         TestMessage1 msg1 = new TestMessage1("hello", 6546, 125.59f, 54132.136646867, 'h');
         TestMessage2 msg2 = new TestMessage2(Gson.class, "world");

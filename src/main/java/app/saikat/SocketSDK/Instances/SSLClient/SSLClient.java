@@ -1,4 +1,4 @@
-package app.saikat.SocketSDK.Instances;
+package app.saikat.SocketSDK.Instances.SSLClient;
 
 import java.net.Socket;
 
@@ -12,7 +12,7 @@ import app.saikat.SocketSDK.IO.MessageQueue;
 
 public class SSLClient extends Client {
 
-    public SSLClient(String name, String serverUrl, int serverPort, MessageQueue inputQueue, Gson gson) {
+    SSLClient(String name, String serverUrl, int serverPort, MessageQueue inputQueue, Gson gson) {
         super(name, serverUrl, serverPort, inputQueue, gson);
     }
 
