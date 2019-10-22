@@ -12,7 +12,7 @@ import app.saikat.SocketSDK.IO.MessageQueue;
 
 public class SSLClient extends Client {
 
-    SSLClient(String name, String serverUrl, int serverPort, MessageQueue inputQueue, Gson gson) {
+    protected SSLClient(String name, String serverUrl, int serverPort, MessageQueue inputQueue, Gson gson) {
         super(name, serverUrl, serverPort, inputQueue, gson);
     }
 

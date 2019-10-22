@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import com.google.gson.Gson;
 
-import app.saikat.SocketSDK.GenricServerClient.Factories.AbstractServerFactory;
+import app.saikat.SocketSDK.GenricServerClient.factories.AbstractServerFactory;
 import app.saikat.SocketSDK.IO.MessageQueue;
 
 public class SSLServerFactory extends AbstractServerFactory<SSLServer> {

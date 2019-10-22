@@ -1,4 +1,4 @@
-package app.saikat.SocketSDK.GenricServerClient.Factories;
+package app.saikat.SocketSDK.GenricServerClient.factories;
 
 import com.google.gson.Gson;
 

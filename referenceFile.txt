@@ -1,5 +1,11 @@
 TestServer:
  {
+  "timestamp": 1571683839436,
+  "session": "edb3b33f-2cc9-4ab6-a0d4-7b6ab7eec6f3",
+  "from": "TestClient"
+}
+TestServer:
+ {
   "str": "hello",
   "i": 6546,
   "f": 125.59,
@@ -7,6 +13,12 @@ TestServer:
   "c": "h"
 }
 -------------------------------------------------------------------------------------------------
+TestClient:
+ {
+  "timestamp": 1571683839452,
+  "session": "edb3b33f-2cc9-4ab6-a0d4-7b6ab7eec6f3",
+  "from": "TestServer"
+}
 TestClient:
  {
   "msg1": {
@@ -22,42 +34,8 @@ TestClient:
 -------------------------------------------------------------------------------------------------
 TestClient:
  {
-  "msgDigest": [
-    -86,
-    -4,
-    -104,
-    116,
-    -15,
-    22,
-    -115,
-    -99,
-    -61,
-    -57,
-    42,
-    5,
-    -40,
-    -120,
-    -75,
-    -92,
-    113,
-    66,
-    -56,
-    111,
-    -75,
-    97,
-    -67,
-    1,
-    118,
-    85,
-    -14,
-    -6,
-    -97,
-    -99,
-    -51,
-    -22
-  ],
-  "timestamp": 1571594436559,
-  "session": "2ad0d0eb-74fb-46d9-a429-27dec6e20385",
+  "timestamp": 1571683840438,
+  "session": "ba7f7370-a8aa-42a2-ae69-43fa2471a75f",
   "from": "TestServer"
 }
 TestClient:
@@ -68,6 +46,12 @@ TestClient:
 -------------------------------------------------------------------------------------------------
 TestServer:
  {
+  "timestamp": 1571683840443,
+  "session": "ba7f7370-a8aa-42a2-ae69-43fa2471a75f",
+  "from": "TestClient"
+}
+TestServer:
+ {
   "msg1": null,
   "msg2": {
     "cls": "com.google.gson.Gson",
@@ -76,6 +60,12 @@ TestServer:
   "val": 5642
 }
 -------------------------------------------------------------------------------------------------
+TestClient:
+ {
+  "timestamp": 1571683841441,
+  "session": "79627741-3311-4b42-88f9-f227c5884e55",
+  "from": "TestServer"
+}
 TestClient:
  {
   "msg1": {
@@ -92,6 +82,12 @@ TestClient:
   "val": 5665
 }
 -------------------------------------------------------------------------------------------------
+TestServer:
+ {
+  "timestamp": 1571683842446,
+  "session": "e9ce7cdd-1f1e-4ff6-a877-abfbd0970e12",
+  "from": "TestClient"
+}
 TestServer:
  {
   "context": "STATUS",

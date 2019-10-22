@@ -10,7 +10,7 @@ import app.saikat.SocketSDK.IO.MessageQueue;
 
 public class InsecureServer extends Server {
 
-    InsecureServer(String name, int port, Gson gson, MessageQueue inputQueue) {
+    protected InsecureServer(String name, int port, Gson gson, MessageQueue inputQueue) {
         super(name, port, gson, inputQueue);
 	}
 

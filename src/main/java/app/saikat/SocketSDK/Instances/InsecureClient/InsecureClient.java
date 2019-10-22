@@ -11,7 +11,7 @@ import app.saikat.SocketSDK.IO.MessageQueue;
 
 public class InsecureClient extends Client {
 
-    InsecureClient(String name, String serverUrl, int serverPort, MessageQueue inputQueue, Gson gson) {
+    protected InsecureClient(String name, String serverUrl, int serverPort, MessageQueue inputQueue, Gson gson) {
         super(name, serverUrl, serverPort, inputQueue, gson);
     }
 

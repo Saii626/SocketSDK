@@ -1,12 +1,9 @@
 package app.saikat.SocketSDK;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.UUID;
@@ -17,17 +14,10 @@ import com.google.gson.Gson;
 
 import org.junit.Test;
 
-import app.saikat.CommonLogic.Threads.ThreadPoolManager;
-import app.saikat.ConfigurationManagement.interfaces.ConfigurationManager;
 import app.saikat.DIManagement.DIManager;
 import app.saikat.DIManagement.Configurations.MethodAnnotationConfig;
 import app.saikat.DIManagement.Configurations.ScanConfig;
 import app.saikat.DIManagement.Exceptions.ClassNotUnderDIException;
-import app.saikat.LogManagement.Logger;
-import app.saikat.LogManagement.LoggerFactory;
-import app.saikat.SocketSDK.Exceptions.WrongHandlerMethodException;
-import app.saikat.SocketSDK.IO.MessageHandlers;
-import app.saikat.SocketSDK.IO.MessageQueue;
 import app.saikat.SocketSDK.Instances.InsecureClient.InsecureClient;
 import app.saikat.SocketSDK.Instances.InsecureClient.InsecureClientFactory;
 import app.saikat.SocketSDK.Instances.InsecureServer.InsecureServer;
@@ -39,8 +29,6 @@ import app.saikat.SocketSDK.TestMessageHandlers.TestMessage2;
 import app.saikat.SocketSDK.TestMessageHandlers.TestMessage3;
 
 public class TestServerClient {
-
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Test
     public void testSdk() throws ClassNotUnderDIException, InterruptedException, IOException {
@@ -54,31 +42,6 @@ public class TestServerClient {
                 .addPackagesToScan("app.saikat")
                 .build();
         DIManager.initialize(config);
-
-        // MessageHandlers handlers = new MessageHandlers();
-        // List<Method> handlerMethods = DIManager.getAnnotatedMethods(MessageHandlerAnnot.class);
-
-        // handlerMethods.forEach(m -> {
-        //     Class<?> parentCls = m.getDeclaringClass();
-        //     Class<? extends Annotation> parentClsAnnotation = DIManager.getQualifierAnnotation(parentCls);
-
-        //     try {
-        //         Object obj = DIManager.get(parentCls, parentClsAnnotation);
-        //         assertTrue("Got valid object", obj != null);
-
-        //         handlers.addHandler(m, obj);
-        //     } catch (ClassNotUnderDIException | WrongHandlerMethodException e) {
-        //         logger.error(e);
-        //         assertTrue("Error", false);
-        //     }
-        // });
-
-        // ThreadPoolManager threadPoolManager = DIManager.get(ThreadPoolManager.class);
-        // MessageQueue messageQueue = new MessageQueue(handlers, threadPoolManager);
-        // Gson gson = DIManager.get(Gson.class);
-
-        // ConfigurationManager configurationManager = DIManager.get(ConfigurationManager.class);
-        // configurationManager.syncConfigurations();
 
         InsecureServerFactory serverFactory = DIManager.get(InsecureServerFactory.class);
         InsecureClientFactory clientFactory = DIManager.get(InsecureClientFactory.class);
@@ -110,11 +73,11 @@ public class TestServerClient {
 
         File f = new File("testFile.txt");
         List<String> fileContents = Lists.newArrayList(new String(Files.readAllBytes(f.toPath()), "utf-8").split("\n"));
-        fileContents = fileContents.stream().filter(line -> !line.startsWith("\"timestamp\":")).collect(Collectors.toList());
+        fileContents = fileContents.stream().filter(line -> !(line.contains("\"timestamp\":") || line.contains("\"session\":"))).collect(Collectors.toList());
 
         File ref = new File("referenceFile.txt");
         List<String> refContents = Lists.newArrayList(new String(Files.readAllBytes(ref.toPath()), "utf-8").split("\n"));
-        refContents = fileContents.stream().filter(line -> !line.startsWith("\"timestamp\":")).collect(Collectors.toList());
+        refContents = refContents.stream().filter(line -> !(line.contains("\"timestamp\":") || line.contains("\"session\":"))).collect(Collectors.toList());
 
         assertArrayEquals("Comparing messages received", refContents.toArray(), fileContents.toArray());
     }

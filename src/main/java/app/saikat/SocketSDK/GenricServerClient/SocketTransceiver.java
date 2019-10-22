@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -82,14 +79,10 @@ public abstract class SocketTransceiver implements Sender, Receiver {
             String sizeLineStr = null;
 
             while (sizeLineStr == null || sizeLineStr.length() == 0) {
-                synchronized (this.isReading) {
-                    this.isReading.set(false); // Waiting to read
-                    this.isReading.notifyAll();
-                }
                 int digit = inputStream.read();
 
                 synchronized (this.isReading) {
-                    this.isReading.set(true); // Reading bits
+                    this.isReading.set(true);
                     this.isReading.notifyAll();
                 }
 
@@ -100,6 +93,10 @@ public abstract class SocketTransceiver implements Sender, Receiver {
                     digit = inputStream.read();
                 }
 
+                synchronized (this.isReading) {
+                    this.isReading.set(false);
+                    this.isReading.notifyAll();
+                }
                 sizeLineStr = new String(sizeBytes, 0, i, "utf-8");
             }
 
@@ -129,21 +126,6 @@ public abstract class SocketTransceiver implements Sender, Receiver {
             // If message is received after 1 min discard
             if (currentTime - messageHeader.getTimestamp() > 60 * 1000) {
                 logger.error("Received message too late. Dropping");
-                return null;
-            }
-
-            MessageDigest messageDigest;
-            try {
-                messageDigest = MessageDigest.getInstance("SHA-256");
-            } catch (NoSuchAlgorithmException e) {
-                logger.error("Error: {}", e);
-                return null;
-            }
-
-            byte[] digest = messageDigest.digest(payload);
-
-            if (!Arrays.equals(messageHeader.getMsgDigest(), digest)) {
-                logger.error("Payload modified. Dropping");
                 return null;
             }
 
@@ -184,18 +166,9 @@ public abstract class SocketTransceiver implements Sender, Receiver {
                     .toJson(obj);
             byte[] payload = msg.getBytes("utf-8");
 
-            MessageDigest messageDigest;
-            try {
-                messageDigest = MessageDigest.getInstance("SHA-256");
-            } catch (NoSuchAlgorithmException e) {
-                logger.error("Error: {}", e);
-                return;
-            }
-
-            byte[] digest = messageDigest.digest(payload);
             long timestamp = System.currentTimeMillis();
 
-            MessageHeader messageHeaderObj = new MessageHeader(timestamp, session, digest, getName());
+            MessageHeader messageHeaderObj = new MessageHeader(timestamp, session, getName());
 
             String msgHeader = this.getGson()
                     .toJson(messageHeaderObj);

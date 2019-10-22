@@ -44,8 +44,10 @@ public class TestHandler {
     }
 
     @MessageHandlerAnnot
-    public void handleMessage1(TestMessage1 testMessage1, Sender sendable) throws IOException {
+    public void handleMessage1(TestMessage1 testMessage1, Sender sendable, MessageHeader header) throws IOException {
         String receivedMsg = this.gson.toJson(testMessage1);
+        String headerInfo = this.gson.toJson(header);
+        out.write(String.format("%s:\n %s\n", sendable.getName(), headerInfo).getBytes());
         out.write(String.format("%s:\n %s", sendable.getName(), receivedMsg).getBytes());
         out.write(msgTerminator);
 
@@ -64,15 +66,19 @@ public class TestHandler {
     }
 
     @MessageHandlerAnnot
-    public void handleMessage3(Sender sendable, TestMessage3 testMessage3, UUID id) throws IOException {
+    public void handleMessage3(Sender sendable, TestMessage3 testMessage3, UUID id, MessageHeader header) throws IOException {
         String receivedMsg = this.gson.toJson(testMessage3);
+        String headerInfo = this.gson.toJson(header);
+        out.write(String.format("%s:\n %s\n", sendable.getName(), headerInfo).getBytes());
         out.write(String.format("%s:\n %s", sendable.getName(), receivedMsg).getBytes());
         out.write(msgTerminator);
     }
 
     @MessageHandlerAnnot
-    public void handleInfoMessage(Sender sendable, InfoMessage infoMsg, UUID id) throws IOException {
+    public void handleInfoMessage(Sender sendable, InfoMessage infoMsg, UUID id, MessageHeader header) throws IOException {
         String receivedMsg = this.gson.toJson(infoMsg);
+        String headerInfo = this.gson.toJson(header);
+        out.write(String.format("%s:\n %s\n", sendable.getName(), headerInfo).getBytes());
         out.write(String.format("%s:\n %s", sendable.getName(), receivedMsg).getBytes());
         out.write(msgTerminator);
     }
