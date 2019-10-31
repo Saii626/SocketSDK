@@ -7,8 +7,8 @@ import app.saikat.SocketSDK.IO.MessageQueue;
 
 public class MessageQueueProvider {
 
-    @Provides
-    public MessageQueue getMessageQueue(MessageHandlers handlers, ThreadPoolManager manager) {
-        return new MessageQueue(handlers, manager);
-    }
+	@Provides
+	public MessageQueue getMessageQueue(MessageHandlers handlers, ThreadPoolManager manager) {
+		return new MessageQueue(handlers, manager);
+	}
 }

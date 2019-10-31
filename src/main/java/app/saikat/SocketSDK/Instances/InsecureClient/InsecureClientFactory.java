@@ -9,14 +9,14 @@ import app.saikat.SocketSDK.IO.MessageQueue;
 
 public class InsecureClientFactory extends AbstractClientFactory<InsecureClient> {
 
-    @Inject
-    public InsecureClientFactory(MessageQueue messageQueue, Gson gson) {
-        super(messageQueue, gson);
-    }
+	@Inject
+	public InsecureClientFactory(MessageQueue messageQueue, Gson gson) {
+		super(messageQueue, gson);
+	}
 
-    @Override
-    public InsecureClient getClient(String name, String serverUrl, int serverPort) {
-        return new InsecureClient(name, serverUrl, serverPort, messageQueue, gson);
-    }
+	@Override
+	public InsecureClient getClient(String name, String serverUrl, int serverPort) {
+		return new InsecureClient(name, serverUrl, serverPort, messageQueue, gson);
+	}
 
 }

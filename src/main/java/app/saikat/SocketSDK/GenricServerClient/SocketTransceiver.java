@@ -20,181 +20,181 @@ import app.saikat.SocketSDK.IO.Message;
 
 public abstract class SocketTransceiver implements Sender, Receiver {
 
-    private AtomicBoolean isReading = new AtomicBoolean();
-    private AtomicBoolean isWriting = new AtomicBoolean();
+	private AtomicBoolean isReading = new AtomicBoolean();
+	private AtomicBoolean isWriting = new AtomicBoolean();
 
-    private Optional<Thread> readerThread = Optional.empty();
-    private Optional<Thread> writerThread = Optional.empty();
+	private Optional<Thread> readerThread = Optional.empty();
+	private Optional<Thread> writerThread = Optional.empty();
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    protected abstract Socket getSocket();
+	protected abstract Socket getSocket();
 
-    protected abstract Gson getGson();
+	protected abstract Gson getGson();
 
-    public void stop() throws IOException, InterruptedException {
-        this.getSocket()
-                .shutdownInput();
-        this.getSocket()
-                .shutdownOutput();
+	public void stop() throws IOException, InterruptedException {
+		this.getSocket()
+				.shutdownInput();
+		this.getSocket()
+				.shutdownOutput();
 
-        synchronized (readerThread) {
-            readerThread.ifPresent(t -> t.interrupt());
-        }
+		synchronized (readerThread) {
+			readerThread.ifPresent(t -> t.interrupt());
+		}
 
-        synchronized (writerThread) {
-            writerThread.ifPresent(t -> t.interrupt());
-        }
+		synchronized (writerThread) {
+			writerThread.ifPresent(t -> t.interrupt());
+		}
 
-        synchronized (isReading) {
-            while (isReading.get()) {
-                isReading.wait(1000);
-                logger.debug("{} still reading", Thread.currentThread()
-                        .getName());
-            }
-        }
+		synchronized (isReading) {
+			while (isReading.get()) {
+				isReading.wait(1000);
+				logger.debug("{} still reading", Thread.currentThread()
+						.getName());
+			}
+		}
 
-        synchronized (isWriting) {
-            while (isWriting.get()) {
-                isWriting.wait(1000);
-                logger.debug("{} still writing", Thread.currentThread()
-                        .getName());
-            }
-        }
-        this.getSocket()
-                .close();
-    }
+		synchronized (isWriting) {
+			while (isWriting.get()) {
+				isWriting.wait(1000);
+				logger.debug("{} still writing", Thread.currentThread()
+						.getName());
+			}
+		}
+		this.getSocket()
+				.close();
+	}
 
-    @Override
-    public Message read() {
-        synchronized (readerThread) {
-            readerThread = Optional.of(Thread.currentThread());
-        }
+	@Override
+	public Message read() {
+		synchronized (readerThread) {
+			readerThread = Optional.of(Thread.currentThread());
+		}
 
-        try {
-            InputStream inputStream = this.getSocket()
-                    .getInputStream();
+		try {
+			InputStream inputStream = this.getSocket()
+					.getInputStream();
 
-            byte[] sizeBytes = new byte[1000];
-            String sizeLineStr = null;
+			byte[] sizeBytes = new byte[1000];
+			String sizeLineStr = null;
 
-            while (sizeLineStr == null || sizeLineStr.length() == 0) {
-                int digit = inputStream.read();
+			while (sizeLineStr == null || sizeLineStr.length() == 0) {
+				int digit = inputStream.read();
 
-                synchronized (this.isReading) {
-                    this.isReading.set(true);
-                    this.isReading.notifyAll();
-                }
+				synchronized (this.isReading) {
+					this.isReading.set(true);
+					this.isReading.notifyAll();
+				}
 
-                int i = 0;
-                while (digit != '\n' && digit != -1 && i < 1000) {
-                    sizeBytes[i] = (byte) digit;
-                    i++;
-                    digit = inputStream.read();
-                }
+				int i = 0;
+				while (digit != '\n' && digit != -1 && i < 1000) {
+					sizeBytes[i] = (byte) digit;
+					i++;
+					digit = inputStream.read();
+				}
 
-                synchronized (this.isReading) {
-                    this.isReading.set(false);
-                    this.isReading.notifyAll();
-                }
-                sizeLineStr = new String(sizeBytes, 0, i, "utf-8");
-            }
+				synchronized (this.isReading) {
+					this.isReading.set(false);
+					this.isReading.notifyAll();
+				}
+				sizeLineStr = new String(sizeBytes, 0, i, "utf-8");
+			}
 
-            String[] s = sizeLineStr.split(" ");
-            logger.info(sizeLineStr);
+			String[] s = sizeLineStr.split(" ");
+			logger.info(sizeLineStr);
 
-            int headerLength = Integer.parseInt(s[0]);
-            int payloadLength = Integer.parseInt(s[1]);
+			int headerLength = Integer.parseInt(s[0]);
+			int payloadLength = Integer.parseInt(s[1]);
 
-            byte[] header = new byte[headerLength];
-            byte[] payload = new byte[payloadLength];
+			byte[] header = new byte[headerLength];
+			byte[] payload = new byte[payloadLength];
 
-            inputStream.read(header);
-            inputStream.read(payload);
+			inputStream.read(header);
+			inputStream.read(payload);
 
-            String messageHeaderStr = new String(header, "utf-8");
-            MessageHeader messageHeader = this.getGson()
-                    .fromJson(messageHeaderStr, MessageHeader.class);
+			String messageHeaderStr = new String(header, "utf-8");
+			MessageHeader messageHeader = this.getGson()
+					.fromJson(messageHeaderStr, MessageHeader.class);
 
-            long currentTime = System.currentTimeMillis();
+			long currentTime = System.currentTimeMillis();
 
-            if (messageHeader.getTimestamp() > currentTime) {
-                logger.error("Received message from future. Dropping");
-                return null;
-            }
+			if (messageHeader.getTimestamp() > currentTime) {
+				logger.error("Received message from future. Dropping");
+				return null;
+			}
 
-            // If message is received after 1 min discard
-            if (currentTime - messageHeader.getTimestamp() > 60 * 1000) {
-                logger.error("Received message too late. Dropping");
-                return null;
-            }
+			// If message is received after 1 min discard
+			if (currentTime - messageHeader.getTimestamp() > 60 * 1000) {
+				logger.error("Received message too late. Dropping");
+				return null;
+			}
 
-            String payloadStr = new String(payload, "utf-8");
-            return Message.containing(messageHeader, this.getGson()
-                    .fromJson(payloadStr, JsonObject.class));
-        } catch (Exception e) {
-            logger.error("Error", e);
-            return null;
-        } finally {
-            synchronized (this.isReading) {
-                this.isReading.set(false);
-                this.isReading.notifyAll();
-            }
-            synchronized (readerThread) {
-                readerThread = Optional.empty();
-            }
-        }
-    }
+			String payloadStr = new String(payload, "utf-8");
+			return Message.containing(messageHeader, this.getGson()
+					.fromJson(payloadStr, JsonObject.class));
+		} catch (Exception e) {
+			logger.error("Error", e);
+			return null;
+		} finally {
+			synchronized (this.isReading) {
+				this.isReading.set(false);
+				this.isReading.notifyAll();
+			}
+			synchronized (readerThread) {
+				readerThread = Optional.empty();
+			}
+		}
+	}
 
-    @Override
-    public <T> void send(T data, UUID session) throws IOException {
-        synchronized (writerThread) {
-            writerThread = Optional.of(Thread.currentThread());
-        }
+	@Override
+	public <T> void send(T data, UUID session) throws IOException {
+		synchronized (writerThread) {
+			writerThread = Optional.of(Thread.currentThread());
+		}
 
-        try {
-            OutputStream outputStream = this.getSocket()
-                    .getOutputStream();
+		try {
+			OutputStream outputStream = this.getSocket()
+					.getOutputStream();
 
-            synchronized (this.isWriting) {
-                this.isWriting.set(true);
-                this.isWriting.notifyAll();
-            }
-            JsonObject obj = new JsonObject(data);
+			synchronized (this.isWriting) {
+				this.isWriting.set(true);
+				this.isWriting.notifyAll();
+			}
+			JsonObject obj = new JsonObject(data);
 
-            String msg = this.getGson()
-                    .toJson(obj);
-            byte[] payload = msg.getBytes("utf-8");
+			String msg = this.getGson()
+					.toJson(obj);
+			byte[] payload = msg.getBytes("utf-8");
 
-            long timestamp = System.currentTimeMillis();
+			long timestamp = System.currentTimeMillis();
 
-            MessageHeader messageHeaderObj = new MessageHeader(timestamp, session, getName());
+			MessageHeader messageHeaderObj = new MessageHeader(timestamp, session, getName());
 
-            String msgHeader = this.getGson()
-                    .toJson(messageHeaderObj);
-            byte[] header = msgHeader.getBytes("utf-8");
+			String msgHeader = this.getGson()
+					.toJson(messageHeaderObj);
+			byte[] header = msgHeader.getBytes("utf-8");
 
-            String sizeStr = String.format("%d %d", header.length, payload.length);
-            byte[] size = sizeStr.getBytes("utf-8");
+			String sizeStr = String.format("%d %d", header.length, payload.length);
+			byte[] size = sizeStr.getBytes("utf-8");
 
-            logger.debug("Sending: {}\\n{}{}\\n", sizeStr, msgHeader, msg);
+			logger.debug("Sending: {}\\n{}{}\\n", sizeStr, msgHeader, msg);
 
-            outputStream.write(size);
-            outputStream.write('\n');
-            outputStream.write(header);
-            outputStream.write(payload);
-            outputStream.flush();
-        } catch (Exception e) {
-            logger.error(e);
-        } finally {
-            synchronized (this.isWriting) {
-                this.isWriting.set(false);
-                this.isWriting.notifyAll();
-            }
-            synchronized (writerThread) {
-                writerThread = Optional.empty();
-            }
-        }
-    }
+			outputStream.write(size);
+			outputStream.write('\n');
+			outputStream.write(header);
+			outputStream.write(payload);
+			outputStream.flush();
+		} catch (Exception e) {
+			logger.error(e);
+		} finally {
+			synchronized (this.isWriting) {
+				this.isWriting.set(false);
+				this.isWriting.notifyAll();
+			}
+			synchronized (writerThread) {
+				writerThread = Optional.empty();
+			}
+		}
+	}
 
 }

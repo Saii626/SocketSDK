@@ -30,55 +30,55 @@ import app.saikat.SocketSDK.TestMessageHandlers.TestMessage3;
 
 public class TestServerClient {
 
-    @Test
-    public void testSdk() throws ClassNotUnderDIException, InterruptedException, IOException {
-        ScanConfig config = ScanConfig.newBuilder()
-                .addAnnotationConfig(MethodAnnotationConfig.getBuilder()
-                        .forAnnotation(MessageHandlerAnnot.class)
-                        .autoBuild(true)
-                        .autoInvoke(false)
-                        .checkDependency(false)
-                        .build())
-                .addPackagesToScan("app.saikat")
-                .build();
-        DIManager.initialize(config);
+	@Test
+	public void testSdk() throws ClassNotUnderDIException, InterruptedException, IOException {
+		ScanConfig config = ScanConfig.newBuilder()
+				.addAnnotationConfig(MethodAnnotationConfig.getBuilder()
+						.forAnnotation(MessageHandlerAnnot.class)
+						.autoBuild(true)
+						.autoInvoke(false)
+						.checkDependency(false)
+						.build())
+				.addPackagesToScan("app.saikat")
+				.build();
+		DIManager.initialize(config);
 
-        InsecureServerFactory serverFactory = DIManager.get(InsecureServerFactory.class);
-        InsecureClientFactory clientFactory = DIManager.get(InsecureClientFactory.class);
-        InsecureServer server = serverFactory.getServer("TestServer", 5000);
-        InsecureClient client = clientFactory.getClient("TestClient", null, 5000);
+		InsecureServerFactory serverFactory = DIManager.get(InsecureServerFactory.class);
+		InsecureClientFactory clientFactory = DIManager.get(InsecureClientFactory.class);
+		InsecureServer server = serverFactory.getServer("TestServer", 5000);
+		InsecureClient client = clientFactory.getClient("TestClient", null, 5000);
 
-        TestMessage1 msg1 = new TestMessage1("hello", 6546, 125.59f, 54132.136646867, 'h');
-        TestMessage2 msg2 = new TestMessage2(Gson.class, "world");
-        server.startServer();
-        Thread.sleep(3000);
-        client.beginConnection();
-        Thread.sleep(3000);
+		TestMessage1 msg1 = new TestMessage1("hello", 6546, 125.59f, 54132.136646867, 'h');
+		TestMessage2 msg2 = new TestMessage2(Gson.class, "world");
+		server.startServer();
+		Thread.sleep(3000);
+		client.beginConnection();
+		Thread.sleep(3000);
 
-        client.send(msg1);
-        Thread.sleep(1000);
-        server.send(msg2);
-        Thread.sleep(1000);
+		client.send(msg1);
+		Thread.sleep(1000);
+		server.send(msg2);
+		Thread.sleep(1000);
 
-        UUID id = UUID.randomUUID();
-        server.send(new TestMessage3(msg1, msg2, 5665), id);
-        Thread.sleep(1000);
+		UUID id = UUID.randomUUID();
+		server.send(new TestMessage3(msg1, msg2, 5665), id);
+		Thread.sleep(1000);
 
-        client.stop();
-        Thread.sleep(1000);
-        server.stop();
-        Thread.sleep(1000);
-        TestHandler handler = DIManager.get(TestHandler.class);
-        handler.endTest();
+		client.stop();
+		Thread.sleep(1000);
+		server.stop();
+		Thread.sleep(1000);
+		TestHandler handler = DIManager.get(TestHandler.class);
+		handler.endTest();
 
-        File f = new File("testFile.txt");
-        List<String> fileContents = Lists.newArrayList(new String(Files.readAllBytes(f.toPath()), "utf-8").split("\n"));
-        fileContents = fileContents.stream().filter(line -> !(line.contains("\"timestamp\":") || line.contains("\"session\":"))).collect(Collectors.toList());
+		File f = new File("testFile.txt");
+		List<String> fileContents = Lists.newArrayList(new String(Files.readAllBytes(f.toPath()), "utf-8").split("\n"));
+		fileContents = fileContents.stream().filter(line -> !(line.contains("\"timestamp\":") || line.contains("\"session\":"))).collect(Collectors.toList());
 
-        File ref = new File("referenceFile.txt");
-        List<String> refContents = Lists.newArrayList(new String(Files.readAllBytes(ref.toPath()), "utf-8").split("\n"));
-        refContents = refContents.stream().filter(line -> !(line.contains("\"timestamp\":") || line.contains("\"session\":"))).collect(Collectors.toList());
+		File ref = new File("referenceFile.txt");
+		List<String> refContents = Lists.newArrayList(new String(Files.readAllBytes(ref.toPath()), "utf-8").split("\n"));
+		refContents = refContents.stream().filter(line -> !(line.contains("\"timestamp\":") || line.contains("\"session\":"))).collect(Collectors.toList());
 
-        assertArrayEquals("Comparing messages received", refContents.toArray(), fileContents.toArray());
-    }
+		assertArrayEquals("Comparing messages received", refContents.toArray(), fileContents.toArray());
+	}
 }

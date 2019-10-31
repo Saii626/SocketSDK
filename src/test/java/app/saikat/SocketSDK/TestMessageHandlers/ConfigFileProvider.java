@@ -7,9 +7,9 @@ import app.saikat.DIManagement.Provides;
 
 public class ConfigFileProvider {
 
-    @Provides
-    @ConfigFile
-    public static File getConfigFile() {
-        return new File("testConfig.config");
-    }
+	@Provides
+	@ConfigFile
+	public static File getConfigFile() {
+		return new File("testConfig.config");
+	}
 }

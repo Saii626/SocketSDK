@@ -7,10 +7,10 @@ import app.saikat.SocketSDK.IO.MessageQueue;
 
 public abstract class AbstractServerFactory<T extends Server> extends AbstractBaseFactory {
 
-    public AbstractServerFactory(MessageQueue messageQueue, Gson gson) {
-        super(messageQueue, gson);
-    }
+	public AbstractServerFactory(MessageQueue messageQueue, Gson gson) {
+		super(messageQueue, gson);
+	}
 
-    public abstract T getServer(String name, int port) ;
+	public abstract T getServer(String name, int port) ;
 
 }

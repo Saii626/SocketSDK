@@ -12,23 +12,23 @@ import app.saikat.SocketSDK.IO.MessageQueue;
 
 public class SSLServer extends Server {
 
-    protected SSLServer(String name, int port, Gson gson, MessageQueue inputQueue) {
-        super(name, port, gson, inputQueue);
+	protected SSLServer(String name, int port, Gson gson, MessageQueue inputQueue) {
+		super(name, port, gson, inputQueue);
 	}
 
-    @Override
-    public ServerSocket createServer(int port) {
-        SSLServerSocketFactory sslSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-        try {
-            return sslSocketFactory.createServerSocket(port);
-        } catch (IOException e) {
-            logger.error("Error: {}", e);
-            return null;
-        }
+	@Override
+	public ServerSocket createServer(int port) {
+		SSLServerSocketFactory sslSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+		try {
+			return sslSocketFactory.createServerSocket(port);
+		} catch (IOException e) {
+			logger.error("Error: {}", e);
+			return null;
+		}
 	}
 
-    // @Override
-    // public boolean validateClient() {
-    //     return false;
-    // }
+	// @Override
+	// public boolean validateClient() {
+	//	 return false;
+	// }
 }

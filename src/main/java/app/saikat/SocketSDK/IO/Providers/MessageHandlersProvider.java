@@ -14,23 +14,23 @@ import app.saikat.SocketSDK.IO.MessageHandlers;
 
 public class MessageHandlersProvider {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Provides
-    public MessageHandlers getMessageHandlers(@MethodHandlers List<Method> handlers) {
-        MessageHandlers messageHandlers = new MessageHandlers();
+	@Provides
+	public MessageHandlers getMessageHandlers(@MethodHandlers List<Method> handlers) {
+		MessageHandlers messageHandlers = new MessageHandlers();
 
-        handlers.forEach(m -> {
-            Class<?> parentCls = m.getDeclaringClass();
-            Class<? extends Annotation> parentClsAnnotation = DIManager.getQualifierAnnotation(parentCls);
+		handlers.forEach(m -> {
+			Class<?> parentCls = m.getDeclaringClass();
+			Class<? extends Annotation> parentClsAnnotation = DIManager.getQualifierAnnotation(parentCls);
 
-            try {
-                Object obj = DIManager.get(parentCls, parentClsAnnotation);
-                messageHandlers.addHandler(m, obj);
-            } catch (ClassNotUnderDIException | WrongHandlerMethodException e) {
-                logger.error(e);
-            }
-        });
-        return messageHandlers;
-    }
+			try {
+				Object obj = DIManager.get(parentCls, parentClsAnnotation);
+				messageHandlers.addHandler(m, obj);
+			} catch (ClassNotUnderDIException | WrongHandlerMethodException e) {
+				logger.error(e);
+			}
+		});
+		return messageHandlers;
+	}
 }
