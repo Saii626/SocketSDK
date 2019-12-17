@@ -14,15 +14,12 @@ import com.google.gson.Gson;
 
 import org.junit.Test;
 
-import app.saikat.DIManagement.DIManager;
-import app.saikat.DIManagement.Configurations.MethodAnnotationConfig;
-import app.saikat.DIManagement.Configurations.ScanConfig;
 import app.saikat.DIManagement.Exceptions.ClassNotUnderDIException;
+import app.saikat.DIManagement.Interfaces.DIManager;
 import app.saikat.SocketSDK.Instances.InsecureClient.InsecureClient;
 import app.saikat.SocketSDK.Instances.InsecureClient.InsecureClientFactory;
 import app.saikat.SocketSDK.Instances.InsecureServer.InsecureServer;
 import app.saikat.SocketSDK.Instances.InsecureServer.InsecureServerFactory;
-import app.saikat.SocketSDK.TestMessageHandlers.MessageHandlerAnnot;
 import app.saikat.SocketSDK.TestMessageHandlers.TestHandler;
 import app.saikat.SocketSDK.TestMessageHandlers.TestMessage1;
 import app.saikat.SocketSDK.TestMessageHandlers.TestMessage2;
@@ -32,19 +29,13 @@ public class TestServerClient {
 
 	@Test
 	public void testSdk() throws ClassNotUnderDIException, InterruptedException, IOException {
-		ScanConfig config = ScanConfig.newBuilder()
-				.addAnnotationConfig(MethodAnnotationConfig.getBuilder()
-						.forAnnotation(MessageHandlerAnnot.class)
-						.autoBuild(true)
-						.autoInvoke(false)
-						.checkDependency(false)
-						.build())
-				.addPackagesToScan("app.saikat")
-				.build();
-		DIManager.initialize(config);
+		DIManager manager = DIManager.newInstance();
+		manager.initialize("app.saikat");
 
-		InsecureServerFactory serverFactory = DIManager.get(InsecureServerFactory.class);
-		InsecureClientFactory clientFactory = DIManager.get(InsecureClientFactory.class);
+		InsecureServerFactory serverFactory = manager.getBeanOfType(InsecureServerFactory.class).getProvider().get();
+		InsecureClientFactory clientFactory = manager.getBeanOfType(InsecureClientFactory.class).getProvider().get();
+		TestHandler handler = manager.getBeanOfType(TestHandler.class).getProvider().get();
+
 		InsecureServer server = serverFactory.getServer("TestServer", 5000);
 		InsecureClient client = clientFactory.getClient("TestClient", null, 5000);
 
@@ -68,7 +59,7 @@ public class TestServerClient {
 		Thread.sleep(1000);
 		server.stop();
 		Thread.sleep(1000);
-		TestHandler handler = DIManager.get(TestHandler.class);
+		
 		handler.endTest();
 
 		File f = new File("testFile.txt");

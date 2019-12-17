@@ -2,8 +2,8 @@ package app.saikat.SocketSDK.TestMessageHandlers;
 
 import java.io.File;
 
-import app.saikat.ConfigurationManagement.interfaces.ConfigFile;
-import app.saikat.DIManagement.Provides;
+import app.saikat.Annotations.ConfigurationManagement.ConfigFile;
+import app.saikat.Annotations.DIManagement.Provides;
 
 public class ConfigFileProvider {
 

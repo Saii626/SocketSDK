@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.inject.Provider;
+
 import com.google.common.collect.Lists;
 
-import app.saikat.LogManagement.Logger;
-import app.saikat.LogManagement.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import app.saikat.CommonLogic.Threads.ThreadPoolManager;
+import app.saikat.Annotations.DIManagement.Provides;
 import app.saikat.PojoCollections.CommonObjects.Either;
 import app.saikat.PojoCollections.CommonObjects.Tuple;
 import app.saikat.SocketSDK.CommonFiles.MessageHeader;
@@ -20,6 +22,7 @@ import app.saikat.SocketSDK.CommonFiles.SessionData;
 import app.saikat.SocketSDK.GenricServerClient.Client;
 import app.saikat.SocketSDK.GenricServerClient.Server;
 import app.saikat.SocketSDK.GenricServerClient.interfaces.Sender;
+import app.saikat.ThreadManagement.interfaces.ThreadPoolManager;
 
 public class MessageQueue {
 	
@@ -31,7 +34,7 @@ public class MessageQueue {
 	private MessageHandlers messageHandlers;
 	private ThreadPoolManager threadPoolManager;
 
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private Logger logger = LogManager.getLogger(this.getClass());
 
 	public MessageQueue(MessageHandlers handlers, ThreadPoolManager threadPoolManager) {
 		messageQueue = Collections.synchronizedList(new LinkedList<>());
@@ -78,7 +81,7 @@ public class MessageQueue {
 
 			Class<?> objectClass = toProcess.second.second.getObject()
 					.getClass();
-			List<Tuple<Object, Method>> handlerList = messageHandlers.getHandlers()
+			List<Tuple<Provider<?>, Method>> handlerList = messageHandlers.getHandlers()
 					.get(objectClass);
 
 			if (handlerList == null || handlerList.isEmpty()) {
@@ -86,21 +89,8 @@ public class MessageQueue {
 				return;
 			}
 
-			for (Tuple<Object, Method> entry : handlerList) {
-				
-				threadPoolManager.execute(() -> executeMethod(entry.second, toProcess, entry.first));
-
-					// object = DIManager.get(entry.first);
-
-					// List<Method> declaredMethods = Lists.newArrayList(entry.first.getClass()
-					//		 .getDeclaredMethods());
-
-					// // Invoke methods in different executor threads
-					// declaredMethods.stream()
-					//		 .filter(m -> m.getName()
-					//				 .equals(entry.second))
-					//		 .filter(m -> this.filterBasedOnParameters(m, objectClass, toProcess.first))
-					//		 .forEach(m -> threadPoolManager.execute(() -> executeMethod(m, toProcess, object)));
+			for (Tuple<Provider<?>, Method> entry : handlerList) {
+				threadPoolManager.execute(() -> executeMethod(entry.second, toProcess, entry.first == null ? null : entry.first.get()));
 			}
 		}
 
@@ -139,18 +129,8 @@ public class MessageQueue {
 		}
 	}
 
-	// private boolean filterBasedOnParameters(Method m, Class<?> objClass, Either<Server, Client> source) {
-	//	 List<Class<?>> parameters = Lists.newArrayList(m.getParameterTypes());
-
-	//	 if (parameters.contains(objClass)) {
-	//		 if (parameters.contains(Server.class)) {
-	//			 return source.containsLeft();
-	//		 } else if (parameters.contains(Client.class)) {
-	//			 return source.containsRight();
-	//		 }
-	//		 return true;
-	//	 } else {
-	//		 return false;
-	//	 }
-	// }
+	@Provides
+	public static MessageQueue getMessageQueue(MessageHandlers handlers, ThreadPoolManager manager) {
+		return new MessageQueue(handlers, manager);
+	}
 }

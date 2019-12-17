@@ -7,8 +7,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.gson.Gson;
 
-import app.saikat.LogManagement.Logger;
-import app.saikat.LogManagement.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import app.saikat.PojoCollections.SocketMessages.Context;
 import app.saikat.PojoCollections.SocketMessages.InfoMessage;
 import app.saikat.SocketSDK.CommonFiles.Statistics;
@@ -28,7 +29,7 @@ public abstract class Client extends SocketTransceiver {
 	private String serverName;
 	protected AtomicBoolean running;
 
-	protected Logger logger = LoggerFactory.getLogger(this.getClass());
+	protected Logger logger = LogManager.getLogger(this.getClass());
 	protected Statistics clientStatistics;
 
 	public Client(String name, String serverUrl, int serverPort, MessageQueue inputQueue, Gson gson) {

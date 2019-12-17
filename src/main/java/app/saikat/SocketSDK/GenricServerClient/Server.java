@@ -8,8 +8,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.gson.Gson;
 
-import app.saikat.LogManagement.Logger;
-import app.saikat.LogManagement.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import app.saikat.PojoCollections.SocketMessages.InfoMessage;
 import app.saikat.PojoCollections.SocketMessages.Context;
@@ -30,7 +30,7 @@ public abstract class Server extends SocketTransceiver {
 	protected int PORT;
 	protected AtomicBoolean running;
 
-	protected Logger logger = LoggerFactory.getLogger(this.getClass());
+	protected Logger logger = LogManager.getLogger(this.getClass());
 	protected Statistics serverStatistics;
 
 	public Server(String name, int port, Gson gson, MessageQueue inputQueue) {
@@ -63,6 +63,7 @@ public abstract class Server extends SocketTransceiver {
 
 	/**
 	 * Create the server
+	 * @param port the port on which to listen to
 	 * @return ServerSocket of the created server
 	 */
 	public abstract ServerSocket createServer(int port);

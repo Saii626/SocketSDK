@@ -10,9 +10,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.gson.Gson;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import app.saikat.GsonManagement.JsonObject;
-import app.saikat.LogManagement.Logger;
-import app.saikat.LogManagement.LoggerFactory;
 import app.saikat.SocketSDK.CommonFiles.MessageHeader;
 import app.saikat.SocketSDK.GenricServerClient.interfaces.Receiver;
 import app.saikat.SocketSDK.GenricServerClient.interfaces.Sender;
@@ -26,7 +27,7 @@ public abstract class SocketTransceiver implements Sender, Receiver {
 	private Optional<Thread> readerThread = Optional.empty();
 	private Optional<Thread> writerThread = Optional.empty();
 
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private Logger logger = LogManager.getLogger(this.getClass());
 
 	protected abstract Socket getSocket();
 

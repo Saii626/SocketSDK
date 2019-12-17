@@ -11,7 +11,7 @@ public interface Sender extends Name {
 	 * Sends an object to underlying socket. If this thread has a session, that session 
 	 * is used. Else new session is created
 	 * @param <T> type of object to send
-	 * @param object object to send to client
+	 * @param data object to send to client
 	 * @throws IOException if unable to send o server
 	 */
 	default <T> void send(T data) throws IOException {
@@ -26,7 +26,7 @@ public interface Sender extends Name {
 	/**
 	 * Sends an object to underlying socket using an old session
 	 * @param <T> type of object to send
-	 * @param object object to send to client
+	 * @param data object to send to client
 	 * @param session the session of this message
 	 * @throws IOException if unable to send o server
 	 */

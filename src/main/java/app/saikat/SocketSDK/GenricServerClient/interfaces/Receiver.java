@@ -15,7 +15,7 @@ public interface Receiver extends Name {
 
 	/**
 	 * Reads a message from inputstream
-	 * @return
+	 * @return the message that was currently read
 	 */
 	Message read();
 

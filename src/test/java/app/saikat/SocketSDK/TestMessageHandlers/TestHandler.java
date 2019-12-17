@@ -5,21 +5,19 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import com.google.gson.Gson;
 
-import app.saikat.DIManagement.DIManager;
-import app.saikat.DIManagement.Provides;
+import app.saikat.Annotations.SocketSDK.MessageHandler;
 import app.saikat.PojoCollections.SocketMessages.InfoMessage;
 import app.saikat.SocketSDK.CommonFiles.MessageHeader;
 import app.saikat.SocketSDK.GenricServerClient.interfaces.Sender;
-import app.saikat.SocketSDK.IO.Providers.MethodHandlers;
 
+@Singleton
 public class TestHandler {
 
 	private Gson gson;
@@ -37,13 +35,7 @@ public class TestHandler {
 		out = new BufferedOutputStream(fout);
 	}
 
-	@Provides
-	@MethodHandlers
-	public List<Method> getMethodHandlers() {
-		return DIManager.getAnnotatedMethods(MessageHandlerAnnot.class);		
-	}
-
-	@MessageHandlerAnnot
+	@MessageHandler
 	public void handleMessage1(TestMessage1 testMessage1, Sender sendable, MessageHeader header) throws IOException {
 		String receivedMsg = this.gson.toJson(testMessage1);
 		String headerInfo = this.gson.toJson(header);
@@ -54,7 +46,7 @@ public class TestHandler {
 		sendable.send(new TestMessage3(testMessage1, null, 1542));
 	}
 
-	@MessageHandlerAnnot
+	@MessageHandler
 	public void handleMessage2(Sender sendable, TestMessage2 testMessage2, MessageHeader header) throws IOException {
 		String receivedMsg = this.gson.toJson(testMessage2);
 		String headerInfo = this.gson.toJson(header);
@@ -65,7 +57,7 @@ public class TestHandler {
 		sendable.send(new TestMessage3(null, testMessage2, 5642));
 	}
 
-	@MessageHandlerAnnot
+	@MessageHandler
 	public void handleMessage3(Sender sendable, TestMessage3 testMessage3, UUID id, MessageHeader header) throws IOException {
 		String receivedMsg = this.gson.toJson(testMessage3);
 		String headerInfo = this.gson.toJson(header);
@@ -74,7 +66,7 @@ public class TestHandler {
 		out.write(msgTerminator);
 	}
 
-	@MessageHandlerAnnot
+	@MessageHandler
 	public void handleInfoMessage(Sender sendable, InfoMessage infoMsg, UUID id, MessageHeader header) throws IOException {
 		String receivedMsg = this.gson.toJson(infoMsg);
 		String headerInfo = this.gson.toJson(header);

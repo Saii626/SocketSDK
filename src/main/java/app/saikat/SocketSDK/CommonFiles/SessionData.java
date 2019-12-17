@@ -9,7 +9,7 @@ public final class SessionData implements AutoCloseable {
 	// Required for autoclosable feature try with resources
 	private static SessionData sessionData = new SessionData();
 
-	private SessionData() { throw new RuntimeException(); }
+	private SessionData() {}
 
 	public static UUID getCurrentSession() {
 		return sessionInfo.get();
