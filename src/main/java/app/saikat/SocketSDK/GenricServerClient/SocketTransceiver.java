@@ -14,10 +14,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import app.saikat.GsonManagement.JsonObject;
+import app.saikat.SocketSDK.CommonFiles.Message;
 import app.saikat.SocketSDK.CommonFiles.MessageHeader;
 import app.saikat.SocketSDK.GenricServerClient.interfaces.Receiver;
 import app.saikat.SocketSDK.GenricServerClient.interfaces.Sender;
-import app.saikat.SocketSDK.IO.Message;
 
 public abstract class SocketTransceiver implements Sender, Receiver {
 

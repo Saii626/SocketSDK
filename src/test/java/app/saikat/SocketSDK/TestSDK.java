@@ -6,38 +6,43 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
 import org.junit.Test;
 
-import app.saikat.DIManagement.Exceptions.ClassNotUnderDIException;
+import app.saikat.Annotations.SocketSDK.MessageHandler;
+import app.saikat.DIManagement.Exceptions.BeanNotFoundException;
+import app.saikat.DIManagement.Interfaces.DIBean;
 import app.saikat.DIManagement.Interfaces.DIManager;
-import app.saikat.SocketSDK.Instances.InsecureClient.InsecureClient;
-import app.saikat.SocketSDK.Instances.InsecureClient.InsecureClientFactory;
-import app.saikat.SocketSDK.Instances.InsecureServer.InsecureServer;
-import app.saikat.SocketSDK.Instances.InsecureServer.InsecureServerFactory;
+import app.saikat.SocketSDK.Instances.InsecureClient;
+import app.saikat.SocketSDK.Instances.InsecureServer;
 import app.saikat.SocketSDK.TestMessageHandlers.TestHandler;
 import app.saikat.SocketSDK.TestMessageHandlers.TestMessage1;
 import app.saikat.SocketSDK.TestMessageHandlers.TestMessage2;
 import app.saikat.SocketSDK.TestMessageHandlers.TestMessage3;
+import app.saikat.SocketSDK.TestMessageHandlers.TestServerClient;
 
-public class TestServerClient {
+public class TestSDK {
 
 	@Test
-	public void testSdk() throws ClassNotUnderDIException, InterruptedException, IOException {
+	public void testSdk() throws InterruptedException, IOException, BeanNotFoundException {
 		DIManager manager = DIManager.newInstance();
-		manager.initialize("app.saikat");
+		manager.scan("app.saikat");
 
-		InsecureServerFactory serverFactory = manager.getBeanOfType(InsecureServerFactory.class).getProvider().get();
-		InsecureClientFactory clientFactory = manager.getBeanOfType(InsecureClientFactory.class).getProvider().get();
-		TestHandler handler = manager.getBeanOfType(TestHandler.class).getProvider().get();
+		Set<DIBean<?>> handlerBeans = manager.getBeansWithType(MessageHandler.class);
+		System.out.println("handlers.size = " + handlerBeans.size());
 
-		InsecureServer server = serverFactory.getServer("TestServer", 5000);
-		InsecureClient client = clientFactory.getClient("TestClient", null, 5000);
+		TestHandler handler = manager.getBeanOfType(TypeToken.of(TestHandler.class)).getProvider().get();
+		TestServerClient serverClient = manager.getBeanOfType(TypeToken.of(TestServerClient.class)).getProvider().get();
+
+		InsecureServer server = serverClient.createServer("TestServer", 5000);
+		InsecureClient client = serverClient.createClient("TestClient", null, 5000);
 
 		TestMessage1 msg1 = new TestMessage1("hello", 6546, 125.59f, 54132.136646867, 'h');
 		TestMessage2 msg2 = new TestMessage2(Gson.class, "world");

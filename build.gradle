@@ -45,9 +45,9 @@ task fatJar(type: Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-build.finalizedBy(copyToLib)
-build.finalizedBy(fatJar)
-build.dependsOn(copyProj)
+jar.finalizedBy(copyToLib)
+jar.finalizedBy(fatJar)
+jar.dependsOn(copyProj)
 
 test {
     useJUnit()
@@ -64,7 +64,7 @@ dependencies {
     implementation project(':Annotations')
 
 
-    implementation group: 'com.google.guava', name: 'guava', version: '28.0-jre'
+    implementation group: 'com.google.guava', name: 'guava', version: '28.2-jre'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.1'
 
     testImplementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.1'    

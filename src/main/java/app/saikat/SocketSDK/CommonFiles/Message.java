@@ -1,4 +1,4 @@
-package app.saikat.SocketSDK.IO;
+package app.saikat.SocketSDK.CommonFiles;
 
 import app.saikat.GsonManagement.JsonObject;
 import app.saikat.PojoCollections.CommonObjects.Tuple;

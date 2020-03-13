@@ -13,8 +13,8 @@ import org.apache.logging.log4j.Logger;
 
 import app.saikat.PojoCollections.SocketMessages.InfoMessage;
 import app.saikat.PojoCollections.SocketMessages.Context;
+import app.saikat.SocketSDK.CommonFiles.Message;
 import app.saikat.SocketSDK.CommonFiles.Statistics;
-import app.saikat.SocketSDK.IO.Message;
 import app.saikat.SocketSDK.IO.MessageQueue;
 
 public abstract class Server extends SocketTransceiver {

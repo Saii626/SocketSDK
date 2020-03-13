@@ -9,7 +9,13 @@ public class ConfigFileProvider {
 
 	@Provides
 	@ConfigFile
-	public static File getConfigFile() {
-		return new File("testConfig.config");
+	static File getConfigFile() {
+		File testconfigFile = new File(System.getProperty("user.home") + "/test/socketSDK_test.conf");
+
+		if (testconfigFile.exists()) {
+			testconfigFile.delete();
+		}
+
+		return testconfigFile;
 	}
 }

@@ -2,7 +2,8 @@ package app.saikat.SocketSDK.GenricServerClient.interfaces;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import app.saikat.SocketSDK.IO.Message;
+import app.saikat.SocketSDK.CommonFiles.Message;
+
 
 public interface Receiver extends Name {
 

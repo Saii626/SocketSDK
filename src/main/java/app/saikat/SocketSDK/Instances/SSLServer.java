@@ -1,4 +1,4 @@
-package app.saikat.SocketSDK.Instances.SSLServer;
+package app.saikat.SocketSDK.Instances;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -7,12 +7,15 @@ import javax.net.ssl.SSLServerSocketFactory;
 
 import com.google.gson.Gson;
 
+import app.saikat.Annotations.DIManagement.GenParam;
+import app.saikat.Annotations.DIManagement.Generate;
 import app.saikat.SocketSDK.GenricServerClient.Server;
 import app.saikat.SocketSDK.IO.MessageQueue;
 
 public class SSLServer extends Server {
 
-	protected SSLServer(String name, int port, Gson gson, MessageQueue inputQueue) {
+	@Generate
+	public SSLServer(@GenParam String name, @GenParam int port, Gson gson, MessageQueue inputQueue) {
 		super(name, port, gson, inputQueue);
 	}
 

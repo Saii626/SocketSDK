@@ -1,4 +1,4 @@
-package app.saikat.SocketSDK.Instances.SSLClient;
+package app.saikat.SocketSDK.Instances;
 
 import java.net.Socket;
 
@@ -7,12 +7,16 @@ import javax.net.ssl.SSLSocketFactory;
 
 import com.google.gson.Gson;
 
+import app.saikat.Annotations.DIManagement.GenParam;
+import app.saikat.Annotations.DIManagement.Generate;
 import app.saikat.SocketSDK.GenricServerClient.Client;
 import app.saikat.SocketSDK.IO.MessageQueue;
 
 public class SSLClient extends Client {
 
-	protected SSLClient(String name, String serverUrl, int serverPort, MessageQueue inputQueue, Gson gson) {
+	@Generate
+	public SSLClient(@GenParam String name, @GenParam String serverUrl, @GenParam int serverPort,
+			MessageQueue inputQueue, Gson gson) {
 		super(name, serverUrl, serverPort, inputQueue, gson);
 	}
 
