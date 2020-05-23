@@ -13,7 +13,7 @@ import javax.inject.Singleton;
 import com.google.gson.Gson;
 
 import app.saikat.Annotations.SocketSDK.MessageHandler;
-import app.saikat.PojoCollections.SocketMessages.InfoMessage;
+import app.saikat.SocketSDK.CommonFiles.InfoMessage;
 import app.saikat.SocketSDK.CommonFiles.MessageHeader;
 import app.saikat.SocketSDK.GenricServerClient.interfaces.Sender;
 

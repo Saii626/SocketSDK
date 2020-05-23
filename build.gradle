@@ -51,8 +51,8 @@ jar.dependsOn(copyProj)
 
 test {
     useJUnit()
-    // failFast = true
-    // maxParallelForks = 5
+    failFast = true
+    maxParallelForks = 5
 }
 
 dependencies {

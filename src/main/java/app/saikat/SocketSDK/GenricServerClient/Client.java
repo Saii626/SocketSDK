@@ -12,8 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import app.saikat.Annotations.ThreadManagement.Stats;
-import app.saikat.PojoCollections.SocketMessages.Context;
-import app.saikat.PojoCollections.SocketMessages.InfoMessage;
+import app.saikat.SocketSDK.CommonFiles.InfoMessage;
 import app.saikat.SocketSDK.CommonFiles.Message;
 import app.saikat.SocketSDK.CommonFiles.Statistics;
 import app.saikat.SocketSDK.IO.MessageQueue;
@@ -92,7 +91,7 @@ public abstract class Client extends SocketTransceiver {
 	 */
 	@Override
 	public void stop() throws IOException, InterruptedException {
-		send(new InfoMessage(Context.STATUS, "Lifecycle message", "Client shutting down"));
+		send(new InfoMessage("Lifecycle message", "Client shutting down"));
 
 		// Begin client shutdown
 		super.stop();

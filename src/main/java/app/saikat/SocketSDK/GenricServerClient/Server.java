@@ -13,8 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import app.saikat.Annotations.ThreadManagement.Stats;
-import app.saikat.PojoCollections.SocketMessages.Context;
-import app.saikat.PojoCollections.SocketMessages.InfoMessage;
+import app.saikat.SocketSDK.CommonFiles.InfoMessage;
 import app.saikat.SocketSDK.CommonFiles.Message;
 import app.saikat.SocketSDK.CommonFiles.Statistics;
 import app.saikat.SocketSDK.IO.MessageQueue;
@@ -70,6 +69,10 @@ public abstract class Server extends SocketTransceiver {
 		return this.gson;
 	}
 
+	public int getPORT() {
+		return PORT;
+	}
+
 	/**
 	 * Create the server
 	 * @param port the port on which to listen to
@@ -103,7 +106,7 @@ public abstract class Server extends SocketTransceiver {
 	 * @throws InterruptedException if the thread was interrupted while waiting
 	 */
 	public void stop() throws IOException, InterruptedException {
-		send(new InfoMessage(Context.STATUS, "Lifecycle message", "Server shutting down"));
+		send(new InfoMessage("Lifecycle message", "Server shutting down"));
 
 		// Begin server shutdown
 		running.set(false);
@@ -137,6 +140,7 @@ public abstract class Server extends SocketTransceiver {
 			if (serverSocket == null)
 				return;
 
+			this.PORT = serverSocket.getLocalPort();
 			while (running.get()) {
 
 				this.socket = serverSocket.accept();
