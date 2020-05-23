@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import app.saikat.SocketSDK.CommonFiles.SessionData;
 
-public interface Sender extends Name {
+public interface Sender extends Named {
 
 	/**
 	 * Sends an object to underlying socket. If this thread has a session, that session 

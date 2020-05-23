@@ -2,8 +2,8 @@ package app.saikat.SocketSDK.CommonFiles;
 
 public class Statistics {
 
-	public long startTime;
-	public long endTime;
+	private long startTime;
+	private long endTime;
 
 	private long totalMessagesReceived;
 	private long totalMessagesSent;
@@ -11,6 +11,8 @@ public class Statistics {
 	public Statistics() {
 		totalMessagesReceived = 0;
 		totalMessagesSent = 0;
+		startTime = 0;
+		endTime = 0;
 	}
 
 	public void threadStarted() {
@@ -27,6 +29,15 @@ public class Statistics {
 
 	public void msgSent() {
 		++totalMessagesSent;
+	}
+
+	// Getters
+	public long getStartTime() {
+		return startTime;
+	}
+
+	public long getEndTime() {
+		return endTime;
 	}
 
 	public long getTotalMessagesReceived() {

@@ -7,9 +7,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.gson.Gson;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import app.saikat.Annotations.ThreadManagement.Stats;
 import app.saikat.PojoCollections.SocketMessages.Context;
 import app.saikat.PojoCollections.SocketMessages.InfoMessage;
 import app.saikat.SocketSDK.CommonFiles.Message;
@@ -42,8 +44,15 @@ public abstract class Client extends SocketTransceiver {
 		this.running = new AtomicBoolean();
 
 		this.readerThread = new Thread(this::startClient);
-		this.readerThread.setName(name+"_reader");
+		this.readerThread.setName(name + "_reader");
 		this.clientStatistics = new Statistics();
+	}
+
+	@Stats
+	private void printStats(Logger logger) {
+		logger.printf(Level.INFO, "Client{name=%s, startT=%d, in=%d, out=%d}", serverName,
+				clientStatistics.getStartTime(), clientStatistics.getTotalMessagesReceived(),
+				clientStatistics.getTotalMessagesSent());
 	}
 
 	public abstract Socket connectToSocket(String serverUrl, int serverPort);

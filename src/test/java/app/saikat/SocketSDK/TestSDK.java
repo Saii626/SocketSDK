@@ -27,6 +27,7 @@ import app.saikat.SocketSDK.TestMessageHandlers.TestMessage1;
 import app.saikat.SocketSDK.TestMessageHandlers.TestMessage2;
 import app.saikat.SocketSDK.TestMessageHandlers.TestMessage3;
 import app.saikat.SocketSDK.TestMessageHandlers.TestServerClient;
+import app.saikat.ThreadManagement.interfaces.Scheduler;
 
 public class TestSDK {
 
@@ -34,6 +35,11 @@ public class TestSDK {
 	public void testSdk() throws InterruptedException, IOException, BeanNotFoundException {
 		DIManager manager = DIManager.newInstance();
 		manager.scan("app.saikat");
+
+		// Start the scheduler
+		manager.getBeanOfType(Scheduler.class)
+				.getProvider()
+				.get();
 
 		Set<DIBean<?>> handlerBeans = manager.getBeansWithType(MessageHandler.class);
 		System.out.println("handlers.size = " + handlerBeans.size());

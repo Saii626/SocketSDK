@@ -8,11 +8,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.gson.Gson;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import app.saikat.PojoCollections.SocketMessages.InfoMessage;
+import app.saikat.Annotations.ThreadManagement.Stats;
 import app.saikat.PojoCollections.SocketMessages.Context;
+import app.saikat.PojoCollections.SocketMessages.InfoMessage;
 import app.saikat.SocketSDK.CommonFiles.Message;
 import app.saikat.SocketSDK.CommonFiles.Statistics;
 import app.saikat.SocketSDK.IO.MessageQueue;
@@ -44,6 +46,13 @@ public abstract class Server extends SocketTransceiver {
 		this.readerThread.setName(name+"_reader");
 		readerThread.setName(name);
 		serverStatistics = new Statistics();
+	}
+
+	@Stats
+	private void printStats(Logger logger) {
+		logger.printf(Level.INFO, "Server{name=%s, startT=%d, in=%d, out=%d}", serverName,
+				serverStatistics.getStartTime(), serverStatistics.getTotalMessagesReceived(),
+				serverStatistics.getTotalMessagesSent());
 	}
 
 	@Override

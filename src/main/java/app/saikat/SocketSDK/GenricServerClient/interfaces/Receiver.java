@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import app.saikat.SocketSDK.CommonFiles.Message;
 
 
-public interface Receiver extends Name {
+public interface Receiver extends Named {
 
 	/**
 	 * Override this for custom handling of message received. Calling
