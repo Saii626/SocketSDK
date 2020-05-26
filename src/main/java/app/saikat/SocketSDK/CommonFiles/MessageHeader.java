@@ -6,12 +6,12 @@ public class MessageHeader {
 
 	private long timestamp;
 	private UUID session;
-	private String from;
+	private String token;
 
-	public MessageHeader(long timestamp, UUID session, String from) {
+	public MessageHeader(long timestamp, UUID session, String token) {
 		this.timestamp = timestamp;
 		this.session = session;
-		this.from = from;
+		this.token = token;
 	}
 
 	public long getTimestamp() {
@@ -30,11 +30,11 @@ public class MessageHeader {
 		this.session = session;
 	}
 
-	public String getFrom() {
-		return from;
+	public String getToken() {
+		return token;
 	}
 
-	public void setFrom(String from) {
-		this.from = from;
+	public void setToken(String from) {
+		this.token = from;
 	}
 }

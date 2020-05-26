@@ -3,8 +3,10 @@ package app.saikat.SocketSDK.GenricServerClient;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 import com.google.gson.Gson;
 
@@ -17,11 +19,15 @@ import app.saikat.SocketSDK.CommonFiles.InfoMessage;
 import app.saikat.SocketSDK.CommonFiles.Message;
 import app.saikat.SocketSDK.CommonFiles.Statistics;
 import app.saikat.SocketSDK.IO.MessageQueue;
+import app.saikat.ThreadManagement.impl.CustomThreadFactory;
 
 public abstract class Server extends SocketTransceiver {
 
+	private static CustomThreadFactory threadFactory = new CustomThreadFactory("server");
+
 	protected Thread readerThread;
 	protected MessageQueue inputQueue;
+	protected Function<Message, Boolean> messageValidator = m -> true;
 
 	protected Gson gson;
 	protected Socket socket;
@@ -41,9 +47,7 @@ public abstract class Server extends SocketTransceiver {
 		this.inputQueue = inputQueue;
 		running = new AtomicBoolean();
 
-		readerThread = new Thread(this::initServer);
-		this.readerThread.setName(name+"_reader");
-		readerThread.setName(name);
+		readerThread = threadFactory.newThread(this::initServer);
 		serverStatistics = new Statistics();
 	}
 
@@ -69,8 +73,17 @@ public abstract class Server extends SocketTransceiver {
 		return this.gson;
 	}
 
-	public int getPORT() {
+	public int getPort() {
 		return PORT;
+	}
+
+	/**
+	 * Sets message validator. Executed when a message is received. If message validator
+	 * returns false, the message is dropped and not added to message queue
+	 * @param msgValidator the function to invoke to validate a message
+	 */
+	public void setMessageValidator(Function<Message, Boolean> msgValidator) {
+		this.messageValidator = msgValidator;
 	}
 
 	/**
@@ -115,6 +128,19 @@ public abstract class Server extends SocketTransceiver {
 	}
 
 	/**
+	 * Disconnects the client. Doesnot stop the server
+	 * @throws IOException if unable to send o server
+	 * @throws InterruptedException if the thread was interrupted while waiting
+	 */
+	public void disconnect() throws IOException, InterruptedException {
+		if (running.get()) {
+			send(new InfoMessage("Lifecycle message", "Disconnecting from client"));
+			super.stop();
+		}
+
+	}
+
+	/**
 	 * Gets server statistics
 	 * @return server statistics
 	 */
@@ -124,11 +150,18 @@ public abstract class Server extends SocketTransceiver {
 
 	/**
 	 * Override this for custom handling of message received. Calling
-	 * super.messageReceived(msg) will add the message to inputQueue
+	 * super.messageReceived(msg) will add the message to inputQueue.
+	 * Internally calls message validator to pre validate message
 	 * @param msg message that the client sent
 	 */
 	public void messageReceived(Message msg) {
-		inputQueue.addObjectToInputQueue(msg, this);
+		if (this.messageValidator.apply(msg)) {
+			inputQueue.addObjectToInputQueue(msg, this);
+			serverStatistics.msgReceived();
+		} else {
+			logger.info("Message validation failed. Dropping message: {}", msg);
+		}
+
 	}
 
 	private void initServer() {
@@ -142,9 +175,12 @@ public abstract class Server extends SocketTransceiver {
 
 			this.PORT = serverSocket.getLocalPort();
 			while (running.get()) {
-
-				this.socket = serverSocket.accept();
-				this.startReading(running);
+				try {
+					this.socket = serverSocket.accept();
+					this.startReading(running);
+				} catch (SocketException socketException) {
+					logger.error("Socket exception: ", socketException);
+				}
 			}
 
 		} catch (Exception e) {
