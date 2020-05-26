@@ -13,7 +13,7 @@ import app.saikat.SocketSDK.IO.MessageQueue;
 public class InsecureServer extends Server {
 
 	@Generate
-	public InsecureServer(@GenParam String name, @GenParam int port, Gson gson, MessageQueue inputQueue) {
+	public InsecureServer(@GenParam String name, @GenParam int port, Gson gson, @GenParam MessageQueue inputQueue) {
 		super(name, port, gson, inputQueue);
 	}
 

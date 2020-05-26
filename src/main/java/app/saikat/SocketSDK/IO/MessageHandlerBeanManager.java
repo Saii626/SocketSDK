@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.reflect.Invokable;
 import com.google.common.reflect.TypeToken;
 
@@ -86,8 +87,10 @@ public class MessageHandlerBeanManager extends DIBeanManager {
 		parentBean = target.getDependencies().get(0);
 		logger.debug("Resolved parent dependency: {} with provider: {}", parentBean, parentBean.getProvider());
 
+		MessageHandler msgHandler = target.getInvokable().getAnnotation(MessageHandler.class);
+		
 		Handler<T> handler = new Handler<>(target.getDependencies()
-				.get(0), (Invokable) target.getInvokable(), params);
+				.get(0), (Invokable) target.getInvokable(), params, Lists.newArrayList(msgHandler.queues()));
 		logger.debug("Created handler {} for {}", handler, target);
 		handlers.add(handler);
 

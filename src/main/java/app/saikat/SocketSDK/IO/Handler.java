@@ -1,5 +1,6 @@
 package app.saikat.SocketSDK.IO;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,12 +32,13 @@ public class Handler<T> {
 	private final BiConsumer<Message, Sender> invokeHandler;
 	private final Invokable<Object, Void> invokable;
 	private final SenderType senderType;
+	private final List<Class<? extends Annotation>> qualifiedMessageQueues;
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	@SuppressWarnings("unchecked")
 	public Handler(DIBean<?> parentBean, Invokable<Object, Void> invokable,
-			List<Class<?>> parameterList) {
+			List<Class<?>> parameterList, List<Class<? extends Annotation>> qualifiedMessageQueues) {
 		this.invokable = invokable;
 
 		if (parameterList.contains(Server.class)) {
@@ -80,6 +82,8 @@ public class Handler<T> {
 				throw new RuntimeException(e);
 			}
 		};
+
+		this.qualifiedMessageQueues = qualifiedMessageQueues;
 	}
 
 	public Class<T> getHandlerType() {
@@ -88,6 +92,10 @@ public class Handler<T> {
 
 	public SenderType getSenderType() {
 		return senderType;
+	}
+
+	public List<Class<? extends Annotation>> getQualifiedMessageQueues() {
+		return this.qualifiedMessageQueues;
 	}
 
 	public boolean handlesSenderType(Class<?> cls) {

@@ -15,7 +15,7 @@ import app.saikat.SocketSDK.IO.MessageQueue;
 public class SSLServer extends Server {
 
 	@Generate
-	public SSLServer(@GenParam String name, @GenParam int port, Gson gson, MessageQueue inputQueue) {
+	public SSLServer(@GenParam String name, @GenParam int port, Gson gson, @GenParam MessageQueue inputQueue) {
 		super(name, port, gson, inputQueue);
 	}
 
@@ -32,6 +32,6 @@ public class SSLServer extends Server {
 
 	// @Override
 	// public boolean validateClient() {
-	//	 return false;
+	// 	 return false;
 	// }
 }

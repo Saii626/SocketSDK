@@ -3,8 +3,12 @@ package app.saikat.SocketSDK.GenricServerClient;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -25,7 +29,7 @@ public abstract class SocketTransceiver implements Sender, Receiver {
 	private AtomicBoolean isWriting = new AtomicBoolean();
 
 	private Optional<Thread> readerThread = Optional.empty();
-	private Optional<Thread> writerThread = Optional.empty();
+	private Set<Thread> writerThreads = Collections.synchronizedSet(new HashSet<>());
 
 	private Logger logger = LogManager.getLogger(this.getClass());
 
@@ -43,8 +47,10 @@ public abstract class SocketTransceiver implements Sender, Receiver {
 			readerThread.ifPresent(t -> t.interrupt());
 		}
 
-		synchronized (writerThread) {
-			writerThread.ifPresent(t -> t.interrupt());
+		synchronized (writerThreads) {
+			writerThreads.parallelStream()
+					.forEach(t -> t.interrupt());
+			readerThread.ifPresent(t -> t.interrupt());
 		}
 
 		synchronized (isReading) {
@@ -67,7 +73,7 @@ public abstract class SocketTransceiver implements Sender, Receiver {
 	}
 
 	@Override
-	public Message read() {
+	public Message read() throws IOException {
 		synchronized (readerThread) {
 			readerThread = Optional.of(Thread.currentThread());
 		}
@@ -133,7 +139,7 @@ public abstract class SocketTransceiver implements Sender, Receiver {
 			String payloadStr = new String(payload, "utf-8");
 			return Message.containing(messageHeader, this.getGson()
 					.fromJson(payloadStr, JsonObject.class));
-		} catch (Exception e) {
+		} catch (UnsupportedEncodingException e) {
 			logger.error("Error", e);
 			return null;
 		} finally {
@@ -149,8 +155,8 @@ public abstract class SocketTransceiver implements Sender, Receiver {
 
 	@Override
 	public <T> void send(T data, UUID session) throws IOException {
-		synchronized (writerThread) {
-			writerThread = Optional.of(Thread.currentThread());
+		synchronized (writerThreads) {
+			writerThreads.add(Thread.currentThread());
 		}
 
 		try {
@@ -186,14 +192,17 @@ public abstract class SocketTransceiver implements Sender, Receiver {
 			outputStream.write(payload);
 			outputStream.flush();
 		} catch (Exception e) {
-			logger.error(e);
+			logger.error("Error: ", e);
 		} finally {
-			synchronized (this.isWriting) {
-				this.isWriting.set(false);
-				this.isWriting.notifyAll();
-			}
-			synchronized (writerThread) {
-				writerThread = Optional.empty();
+			synchronized (writerThreads) {
+				writerThreads.remove(Thread.currentThread());
+
+				if (writerThreads.isEmpty()) {
+					synchronized (this.isWriting) {
+						this.isWriting.set(false);
+						this.isWriting.notifyAll();
+					}
+				}
 			}
 		}
 	}

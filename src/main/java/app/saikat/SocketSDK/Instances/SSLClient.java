@@ -16,7 +16,7 @@ public class SSLClient extends Client {
 
 	@Generate
 	public SSLClient(@GenParam String name, @GenParam String serverUrl, @GenParam int serverPort,
-			MessageQueue inputQueue, Gson gson) {
+			@GenParam MessageQueue inputQueue, Gson gson) {
 		super(name, serverUrl, serverPort, inputQueue, gson);
 	}
 
