@@ -1,4 +1,4 @@
-package app.saikat.SocketSDK;
+package app.saikat.SocketSDK.TestMessageHandlers;
 
 import static org.junit.Assert.assertArrayEquals;
 
@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -16,36 +15,37 @@ import com.google.gson.Gson;
 
 import org.junit.Test;
 
-import app.saikat.Annotations.SocketSDK.MessageHandler;
 import app.saikat.DIManagement.Exceptions.BeanNotFoundException;
-import app.saikat.DIManagement.Interfaces.DIBean;
 import app.saikat.DIManagement.Interfaces.DIManager;
 import app.saikat.SocketSDK.Instances.InsecureClient;
 import app.saikat.SocketSDK.Instances.InsecureServer;
-import app.saikat.SocketSDK.TestMessageHandlers.TestHandler;
-import app.saikat.SocketSDK.TestMessageHandlers.TestMessage1;
-import app.saikat.SocketSDK.TestMessageHandlers.TestMessage2;
-import app.saikat.SocketSDK.TestMessageHandlers.TestMessage3;
-import app.saikat.SocketSDK.TestMessageHandlers.TestServerClient;
 import app.saikat.ThreadManagement.interfaces.Scheduler;
 
+/**
+ * Touch test. Check that servers and clients are created properly and able to send data to one another
+ */
 public class TestSDK {
 
 	@Test
 	public void testSdk() throws InterruptedException, IOException, BeanNotFoundException {
 		DIManager manager = DIManager.newInstance();
-		manager.scan("app.saikat");
+
+		manager.scan("app.saikat.DIManagement", "app.saikat.Annotations", "app.saikat.ConfigurationManagement",
+		 "app.saikat.PojoCollections", "app.saikat.GsonManagement", "app.saikat.ThreadManagement",
+		 "app.saikat.SocketSDK.GenericServerClient", "app.saikat.SocketSDK.Instances", "app.saikat.SocketSDK.IO",
+		 "app.saikat.SocketSDK.TestMessageHandlers");
 
 		// Start the scheduler
 		manager.getBeanOfType(Scheduler.class)
 				.getProvider()
 				.get();
 
-		Set<DIBean<?>> handlerBeans = manager.getBeansWithType(MessageHandler.class);
-		System.out.println("handlers.size = " + handlerBeans.size());
-
-		TestHandler handler = manager.getBeanOfType(TypeToken.of(TestHandler.class)).getProvider().get();
-		TestServerClient serverClient = manager.getBeanOfType(TypeToken.of(TestServerClient.class)).getProvider().get();
+		TestHandler handler = manager.getBeanOfType(TypeToken.of(TestHandler.class))
+				.getProvider()
+				.get();
+		TestServerClient serverClient = manager.getBeanOfType(TypeToken.of(TestServerClient.class))
+				.getProvider()
+				.get();
 
 		InsecureServer server = serverClient.createServer("TestServer", 5000);
 		InsecureClient client = serverClient.createClient("TestClient", null, 5000);
@@ -70,16 +70,21 @@ public class TestSDK {
 		Thread.sleep(1000);
 		server.stop();
 		Thread.sleep(1000);
-		
+
 		handler.endTest();
 
 		File f = new File("testFile.txt");
 		List<String> fileContents = Lists.newArrayList(new String(Files.readAllBytes(f.toPath()), "utf-8").split("\n"));
-		fileContents = fileContents.stream().filter(line -> !(line.contains("\"timestamp\":") || line.contains("\"session\":"))).collect(Collectors.toList());
+		fileContents = fileContents.stream()
+				.filter(line -> !(line.contains("\"timestamp\":") || line.contains("\"session\":")))
+				.collect(Collectors.toList());
 
 		File ref = new File("referenceFile.txt");
-		List<String> refContents = Lists.newArrayList(new String(Files.readAllBytes(ref.toPath()), "utf-8").split("\n"));
-		refContents = refContents.stream().filter(line -> !(line.contains("\"timestamp\":") || line.contains("\"session\":"))).collect(Collectors.toList());
+		List<String> refContents = Lists
+				.newArrayList(new String(Files.readAllBytes(ref.toPath()), "utf-8").split("\n"));
+		refContents = refContents.stream()
+				.filter(line -> !(line.contains("\"timestamp\":") || line.contains("\"session\":")))
+				.collect(Collectors.toList());
 
 		assertArrayEquals("Comparing messages received", refContents.toArray(), fileContents.toArray());
 	}

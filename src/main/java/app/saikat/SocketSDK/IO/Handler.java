@@ -24,14 +24,10 @@ import app.saikat.SocketSDK.GenricServerClient.interfaces.Sender;
 
 public class Handler<T> {
 
-	public static enum SenderType {
-		SERVER, CLIENT, SENDER, DONT_CARE
-	};
-
 	private Class<T> handlerType;
+	private Class<? extends Sender> senderType = null;
 	private final BiConsumer<Message, Sender> invokeHandler;
 	private final Invokable<Object, Void> invokable;
-	private final SenderType senderType;
 	private final List<Class<? extends Annotation>> qualifiedMessageQueues;
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
@@ -41,15 +37,6 @@ public class Handler<T> {
 			List<Class<?>> parameterList, List<Class<? extends Annotation>> qualifiedMessageQueues) {
 		this.invokable = invokable;
 
-		if (parameterList.contains(Server.class)) {
-			senderType = SenderType.SERVER;
-		} else if (parameterList.contains(Client.class)) {
-			senderType = SenderType.CLIENT;
-		} else if (parameterList.contains(Sender.class)) {
-			senderType = SenderType.SENDER;
-		} else {
-			senderType = SenderType.DONT_CARE;
-		}
 
 		List<BiFunction<Message, Sender, Object>> paramsExtractor = new ArrayList<>();
 
@@ -58,9 +45,9 @@ public class Handler<T> {
 				paramsExtractor.add((m, s) -> m.first.getSession());
 			} else if (paramCls.equals(MessageHeader.class)) {
 				paramsExtractor.add((m, s) -> m.first);
-			} else if (paramCls.equals(Server.class) || paramCls.equals(Client.class)
-					|| paramCls.equals(Sender.class)) {
+			} else if (Sender.class.isAssignableFrom(paramCls)) {
 				paramsExtractor.add((m, s) -> s);
+				this.senderType = (Class<? extends Sender>)paramCls;
 			} else {
 				this.handlerType = (Class<T>) paramCls;
 				paramsExtractor.add((m, s) -> m.second.getObject());
@@ -71,7 +58,6 @@ public class Handler<T> {
 			List<Object> params = paramsExtractor.stream()
 					.map(e -> e.apply(m, s))
 					.collect(Collectors.toList());
-
 					
 					logger.debug("Handler's parent bean provider is: {}", parentBean.getProvider());
 			Object receiver = parentBean != null ? parentBean.getProvider().get() : null;
@@ -90,24 +76,12 @@ public class Handler<T> {
 		return this.handlerType;
 	}
 
-	public SenderType getSenderType() {
-		return senderType;
-	}
-
 	public List<Class<? extends Annotation>> getQualifiedMessageQueues() {
 		return this.qualifiedMessageQueues;
 	}
 
 	public boolean handlesSenderType(Class<?> cls) {
-		if (cls.equals(Server.class)) {
-			return senderType == SenderType.SERVER || senderType == SenderType.SENDER;
-		} else if (cls.equals(Client.class)) {
-			return senderType == SenderType.CLIENT || senderType == SenderType.SENDER;
-		} else if (cls.equals(Sender.class)) {
-			return senderType == SenderType.SENDER;
-		} else {
-			return senderType == SenderType.DONT_CARE;
-		}
+		return this.senderType == null || this.senderType.isAssignableFrom(cls);
 	}
 
 	public boolean invokeMessageHandler(Message message, Sender sender) {

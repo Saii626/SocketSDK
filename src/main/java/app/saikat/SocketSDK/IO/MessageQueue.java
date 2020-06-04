@@ -15,11 +15,9 @@ import app.saikat.Annotations.DIManagement.Generator;
 import app.saikat.Annotations.DIManagement.Provides;
 import app.saikat.Annotations.SocketSDK.DefaultQueue;
 import app.saikat.DIManagement.Impl.Repository.Repository;
-import app.saikat.PojoCollections.CommonObjects.Either;
 import app.saikat.PojoCollections.CommonObjects.Tuple;
 import app.saikat.SocketSDK.CommonFiles.Message;
-import app.saikat.SocketSDK.GenricServerClient.Client;
-import app.saikat.SocketSDK.GenricServerClient.Server;
+import app.saikat.SocketSDK.GenricServerClient.interfaces.Sender;
 import app.saikat.ThreadManagement.impl.CustomThreadFactory;
 import app.saikat.ThreadManagement.interfaces.ThreadPoolManager;
 
@@ -30,7 +28,7 @@ public class MessageQueue {
 	// Main event-loop thread
 	private Thread eventLoopThread;
 
-	private final List<Tuple<Either<Server, Client>, Message>> messageQueue;
+	private final List<Tuple<Sender, Message>> messageQueue;
 
 	private final Set<Handler<?>> handlers;
 	private ThreadPoolManager threadPoolManager;
@@ -50,25 +48,21 @@ public class MessageQueue {
 		eventLoopThread.start();
 	}
 
-	public void addObjectToInputQueue(Message message, Server server) {
+	public void addObjectToInputQueue(Message message, Sender sender) {
 
 		synchronized (messageQueue) {
-			messageQueue.add(Tuple.of(Either.left(server), message));
+			messageQueue.add(Tuple.of(sender, message));
 			messageQueue.notifyAll();
 		}
 	}
 
-	public void addObjectToInputQueue(Message message, Client client) {
-
-		synchronized (messageQueue) {
-			messageQueue.add(Tuple.of(Either.right(client), message));
-			messageQueue.notifyAll();
-		}
+	public Set<Handler<?>> getHandlers() {
+		return handlers;
 	}
-
+	 
 	private void process() {
 		while (true) {
-			Tuple<Either<Server, Client>, Message> toProcess;
+			Tuple<Sender, Message> toProcess;
 			synchronized (messageQueue) {
 				while (messageQueue.isEmpty()) {
 					try {
@@ -84,9 +78,8 @@ public class MessageQueue {
 			Class<?> objectClass = toProcess.second.second.getObject()
 					.getClass();
 			Set<Handler<?>> handlersToExecute = handlers.parallelStream()
-					.filter(h -> h.getHandlerType()
-							.equals(objectClass)
-							&& h.handlesSenderType(toProcess.first.apply(s -> Server.class, c -> Client.class)))
+					.filter(h -> h.getHandlerType().isAssignableFrom(objectClass)
+							&& h.handlesSenderType(toProcess.first.getClass()))
 					.collect(Collectors.toSet());
 
 			if (handlersToExecute == null || handlersToExecute.isEmpty()) {
@@ -96,7 +89,7 @@ public class MessageQueue {
 
 			for (Handler<?> handler : handlersToExecute) {
 				threadPoolManager.execute(
-						() -> handler.invokeMessageHandler(toProcess.second, toProcess.first.apply(s -> s, c -> c)));
+						() -> handler.invokeMessageHandler(toProcess.second, toProcess.first));
 			}
 		}
 
@@ -105,11 +98,11 @@ public class MessageQueue {
 	@Provides
 	@DefaultQueue
 	private static MessageQueue getDefaultQueue(Repository repository, Generator<MessageQueue> queueGenerator) {
-		Set<Handler<?>> handlers = repository.getBeanManagerOfType(MessageHandlerBeanManager.class)
+		return queueGenerator.generate(repository.getBeanManagerOfType(MessageHandlerBeanManager.class)
 				.getHandlers()
 				.parallelStream()
-				.filter(h -> h.getQualifiedMessageQueues().contains(DefaultQueue.class))
-				.collect(Collectors.toSet());
-		return queueGenerator.generate(handlers);
+				.filter(h -> h.getQualifiedMessageQueues()
+						.contains(DefaultQueue.class))
+				.collect(Collectors.toSet()));
 	}
 }

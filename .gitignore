@@ -49,3 +49,4 @@ hs_err_pid*
 *.iml
 
 testFile.txt
+Session.vim
